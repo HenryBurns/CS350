@@ -56,27 +56,24 @@ int main(int argc, char* argv[]) {
         printf("Enter a letter");
     } 
   }
-  char* one = "./ptree";
+  char* one = "./prog2tree";
   char* two = "-N";
   char three[20];
   char* four = "-M";
   char five[20];
-  char* p = "-p";
-  char* s = "-s";
-  sprintf(three, "%d", levels);
+  char six[20];
+  sprintf(three, "%d", levels-1);
   sprintf(five, "%d", children);
   printf("Stop leaves: %d\n", stop_leaves);
 
   /** TODO p/s thing doesn't work **/
-  char* args[6];
   if(stop_leaves == 1){
-    char* args1[6] = {one, two, three, four, five, p};
-    args = args1;
+    sscanf(six, "-p");
   }
   else {
-    char* args1[6] = {one, two, three, four, five, s};
-    args = args1;
+    sscanf(six, "-s");
   }
+  char* args[7] = {one, two, three, four, five, six, 0};
   for(int i = 0; i < 6; i++){
       printf("%s\n", args[i]);
   }
@@ -94,41 +91,39 @@ int main(int argc, char* argv[]) {
   /* BASE CASE */
   if(levels == 1){
     printf("Level = 1\n");
-    printf("ALIVE: Level %d process with pid=%d, child of %d.",
+    printf("ALIVE: Level %d process with pid=%d, child of %d.\n",
             levels, getpid(), getppid());
     if(stop_leaves == 0)
       sleep(sleep_time);
     else
       pause();
-    printf("EXITING:  Level %d process with pid=%d,child of ppid=%d",
+    printf("EXITING:  Level %d process with pid=%d,child of ppid=%d\n",
       levels, getpid(), getppid());
     return 1;
   }
   printf("ALIVE: Level %d", levels);
-  fflush(stdout);
   printf("process with pid=%d, child of", getpid());
-  fflush(stdout);
-  printf(" %d.", getppid());
+  printf(" %d.\n", getppid());
   fflush(stdout);
 
   /* RECURSIVE PART */
   for(int i = 0; i < children; i++){
     pid_t pid; 
     pid = fork();
-    wait(NULL);
     if(pid == 0){ /* for a child process */   
-      execvp("./ptree", args);
+      execvp("./prog2tree", args);
       return 1;
     }
     else if (pid < 0) { /* error */
-      fprintf(stderr, "Fork failed.");
+      fprintf(stderr, "Fork failed.\n");
       return 1;
     }   
     else { /* parent process */
       /* parent will wait for the child to complete */
-      printf("Child Complete.");
+      wait(NULL);
+      printf("This is the parent.\n");
     }
   }
-  printf("EXITING:  Level %d process with pid=%d, child of ppid=%d", levels, getpid(), getppid());
+  printf("EXITING:  Level %d process with pid=%d, child of ppid=%d\n", levels, getpid(), getppid());
 
 }
