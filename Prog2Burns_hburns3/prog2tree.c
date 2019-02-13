@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
   int pause_state = 0;
   int sleep_time = 1;
   int c;
-  while ((c = getopt (argc, argv, "uN:M:ps")) != -1){
+  while ((c = getopt (argc, argv, "uN:M:ps::")) != -1){
     /* Find the value of the argument letter */
     switch (c){
       case 'u':
@@ -30,7 +30,8 @@ int main(int argc, char* argv[]) {
         children = atoi(optarg);
         break;
       case 'p':
-        if(time != 1){
+        //printf("In P\n");
+        if(time != 0){
           fprintf(stderr, "You may not specify both 'p' and 's' flags");
           return 1;
         }
@@ -38,13 +39,18 @@ int main(int argc, char* argv[]) {
         stop_leaves = 1;
         break;
       case 's':
+        //printf("In S.\n");
         if(pause_state != 0){
           fprintf(stderr, "You may not specify both 'p' and 's' flags");
           return 1;
         }
         stop_leaves = 0;
         time++;
-        sleep_time = atoi(optarg);
+        //printf("End of S. arg '%s'\n", optarg);
+        if(optarg != 0)
+            sleep_time = atoi(optarg);
+        else
+            sleep_time = 1;
         break;
       case '?':
         /* Option does not contain an argument */
@@ -56,6 +62,7 @@ int main(int argc, char* argv[]) {
         printf("Enter a letter");
     } 
   }
+  //printf("Parsed Args\n");
   char* one = "./prog2tree";
   char* two = "-N";
   char three[20];
@@ -64,21 +71,23 @@ int main(int argc, char* argv[]) {
   char six[20];
   sprintf(three, "%d", levels-1);
   sprintf(five, "%d", children);
-  printf("Stop leaves: %d\n", stop_leaves);
+  //printf("Stop leaves: %d\n", stop_leaves);
 
   /** TODO p/s thing doesn't work **/
   if(stop_leaves == 1){
-    sscanf(six, "-p");
+    sprintf(six, "-p");
   }
   else {
-    sscanf(six, "-s");
+    sprintf(six, "-s");
   }
-  char* args[7] = {one, two, three, four, five, six, 0};
-  for(int i = 0; i < 6; i++){
+  char* args[7] = {one, two, three, four, five, six};
+  int i = 0;
+  /**while(args[i] != 0){
       printf("%s\n", args[i]);
-  }
+      i++;
+  } */
   fflush(stdout);
-  printf("Ended args\n");
+  // printf("Ended args\n");
   // 1. Process name.
   // 2. -N
   // 3. -N arg
@@ -90,40 +99,46 @@ int main(int argc, char* argv[]) {
 
   /* BASE CASE */
   if(levels == 1){
-    printf("Level = 1\n");
+    //printf("Level = 1\n");
     printf("ALIVE: Level %d process with pid=%d, child of %d.\n",
             levels, getpid(), getppid());
-    if(stop_leaves == 0)
+    if(stop_leaves == 0){
       sleep(sleep_time);
-    else
-      pause();
-    printf("EXITING:  Level %d process with pid=%d,child of ppid=%d\n",
+      printf("EXITING:  Level %d process with pid=%d,child of ppid=%d\n",
       levels, getpid(), getppid());
+    }
+    else{
+      printf("EXITING:  Level %d process with pid=%d,child of ppid=%d\n",
+      levels, getpid(), getppid());
+      pause();
+      }
     return 1;
   }
-  printf("ALIVE: Level %d", levels);
-  printf("process with pid=%d, child of", getpid());
-  printf(" %d.\n", getppid());
+  printf("ALIVE: Level %d process with pid=%d, child of %d\n", levels, getpid(), getppid());
   fflush(stdout);
 
   /* RECURSIVE PART */
-  for(int i = 0; i < children; i++){
-    pid_t pid; 
-    pid = fork();
+pid_t pid = fork(); 
+  for(int i = 0; i < children-1; i++){
     if(pid == 0){ /* for a child process */   
-      execvp("./prog2tree", args);
-      return 1;
+      break;
     }
     else if (pid < 0) { /* error */
       fprintf(stderr, "Fork failed.\n");
       return 1;
     }   
-    else { /* parent process */
-      /* parent will wait for the child to complete */
-      wait(NULL);
-      printf("This is the parent.\n");
-    }
+    pid = fork();
   }
+    if(pid == 0){ /* for a child process */   
+      printf("Child should execute now");
+      execvp("./prog2tree", args);
+      return 1;
+    }
+    else{
+        for(int i = 0; i < children; i++)
+          wait(NULL);
+    }
+    
   printf("EXITING:  Level %d process with pid=%d, child of ppid=%d\n", levels, getpid(), getppid());
 
 }

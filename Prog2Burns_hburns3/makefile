@@ -2,7 +2,7 @@ CC = g++
 CC_FLAGS = -std=c++14 -Wall -pedantic -g -Wextra
  
 $ALL: prog2tree
-	./prog2tree -N 2 -M 2 
+	./prog2tree -N 3 -M 4 -p
  
 prog2tree: prog2tree.o
 	$(CC) prog2tree.o -o prog2tree
