@@ -1,15 +1,15 @@
 CC = g++
 CC_FLAGS = -std=c++14 -Wall -pedantic -g -Wextra
  
-$ALL: progtree
-	./progtree
+$ALL: prog2tree
+	./prog2tree -N 2 -M 2 
  
-progtree: progtree.o
-	$(CC) progtree.o -o progtree
+prog2tree: prog2tree.o
+	$(CC) prog2tree.o -o prog2tree
  
 # To obtain object files
-%.o: %.c
-	$(CC) -c $(CC_FLAGS) $< -o $@
+prog2tree.o: prog2tree.c
+	$(CC) -c $(CC_FLAGS) prog2tree.c -o prog2tree.o
  
 # Main target
  
